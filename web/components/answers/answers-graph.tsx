@@ -8,6 +8,7 @@ import { Bet } from 'common/bet'
 import { FreeResponseContract } from 'common/contract'
 import { getOutcomeProbability } from 'common/calculate'
 import { useWindowSize } from 'web/hooks/use-window-size'
+import { formatTime } from 'web/lib/util/time'
 
 const NUM_LINES = 6
 
@@ -146,16 +147,6 @@ export const AnswersGraph = memo(function AnswersGraph(props: {
 
 function formatPercent(y: DatumValue) {
   return `${Math.round(+y.toString())}%`
-}
-
-function formatTime(time: number, includeTime: boolean) {
-  const d = dayjs(time)
-
-  if (d.isSame(Date.now(), 'day')) return d.format('ha')
-
-  if (includeTime) return dayjs(time).format('MMM D, ha')
-
-  return dayjs(time).format('MMM D')
 }
 
 const computeProbsByOutcome = (bets: Bet[], contract: FreeResponseContract) => {

@@ -6,6 +6,7 @@ import { Bet } from 'common/bet'
 import { getInitialProbability } from 'common/calculate'
 import { BinaryContract } from 'common/contract'
 import { useWindowSize } from 'web/hooks/use-window-size'
+import { formatTime } from 'web/lib/util/time'
 
 export const ContractProbGraph = memo(function ContractProbGraph(props: {
   contract: BinaryContract
@@ -99,14 +100,4 @@ export const ContractProbGraph = memo(function ContractProbGraph(props: {
 
 function formatPercent(y: DatumValue) {
   return `${Math.round(+y.toString())}%`
-}
-
-function formatTime(time: number, includeTime: boolean) {
-  const d = dayjs(time)
-
-  if (d.isSame(Date.now(), 'day')) return d.format('ha')
-
-  if (includeTime) return dayjs(time).format('MMM D, ha')
-
-  return dayjs(time).format('MMM D')
 }
