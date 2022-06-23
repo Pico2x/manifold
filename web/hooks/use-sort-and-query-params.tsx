@@ -2,6 +2,7 @@ import { defaults, debounce } from 'lodash'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchBox } from 'react-instantsearch-hooks-web'
+import { track } from 'web/lib/service/analytics'
 
 const MARKETS_SORT = 'markets_sort'
 
@@ -13,6 +14,11 @@ export type Sort =
   | 'close-date'
   | 'resolve-date'
   | 'last-updated'
+
+export function checkAgainstQuery(query: string, corpus: string) {
+  const queryWords = query.toLowerCase().split(' ')
+  return queryWords.every((word) => corpus.toLowerCase().includes(word))
+}
 
 export function useInitialQueryAndSort(options?: {
   defaultSort: Sort
@@ -86,6 +92,7 @@ export function useUpdateQueryAndSort(props: {
           delete router.query.q
         }
         router.push(router, undefined, { shallow: true })
+        track('search', { query })
       }, 500),
     [router]
   )

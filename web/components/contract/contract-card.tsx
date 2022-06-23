@@ -22,6 +22,8 @@ import { getExpectedValue, getValueFromBucket } from 'common/calculate-dpm'
 import { QuickBet, ProbBar, getColor } from './quick-bet'
 import { useContractWithPreload } from 'web/hooks/use-contract'
 import { useUser } from 'web/hooks/use-user'
+import { track } from '@amplitude/analytics-browser'
+import { trackCallback } from 'web/lib/service/analytics'
 
 export function ContractCard(props: {
   contract: Contract
@@ -29,8 +31,10 @@ export function ContractCard(props: {
   showCloseTime?: boolean
   className?: string
   onClick?: () => void
+  hideQuickBet?: boolean
 }) {
-  const { showHotVolume, showCloseTime, className, onClick } = props
+  const { showHotVolume, showCloseTime, className, onClick, hideQuickBet } =
+    props
   const contract = useContractWithPreload(props.contract) ?? props.contract
   const { question, outcomeType } = contract
   const { resolution } = contract
@@ -40,12 +44,14 @@ export function ContractCard(props: {
   const marketClosed =
     (contract.closeTime || Infinity) < Date.now() || !!resolution
 
-  const showQuickBet = !(
-    !user ||
-    marketClosed ||
-    (outcomeType === 'FREE_RESPONSE' && getTopAnswer(contract) === undefined) ||
-    outcomeType === 'NUMERIC'
-  )
+  const showQuickBet =
+    user &&
+    !marketClosed &&
+    !(
+      outcomeType === 'FREE_RESPONSE' && getTopAnswer(contract) === undefined
+    ) &&
+    outcomeType !== 'NUMERIC' &&
+    !hideQuickBet
 
   return (
     <div>
@@ -71,12 +77,22 @@ export function ContractCard(props: {
                     if (e.ctrlKey || e.metaKey) return
 
                     e.preventDefault()
+                    track('click market card', {
+                      slug: contract.slug,
+                      contractId: contract.id,
+                    })
                     onClick()
                   }}
                 />
               ) : (
                 <Link href={contractPath(contract)}>
-                  <a className="absolute top-0 left-0 right-0 bottom-0" />
+                  <a
+                    onClick={trackCallback('click market card', {
+                      slug: contract.slug,
+                      contractId: contract.id,
+                    })}
+                    className="absolute top-0 left-0 right-0 bottom-0"
+                  />
                 </Link>
               )}
             </div>

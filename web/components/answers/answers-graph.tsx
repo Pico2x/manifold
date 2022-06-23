@@ -39,12 +39,8 @@ export const AnswersGraph = memo(function AnswersGraph(props: {
   const isLargeWidth = !width || width > 800
   const labelLength = isLargeWidth ? 50 : 20
 
-  const endTime =
-    resolutionTime || isClosed
-      ? latestTime.valueOf()
-      : // Add a fake datapoint in future so the line continues horizontally
-        // to the right.
-        latestTime.add(1, 'month').valueOf()
+  // Add a fake datapoint so the line continues to the right
+  const endTime = latestTime.valueOf()
 
   const times = sortBy([
     createdTime,
@@ -81,6 +77,7 @@ export const AnswersGraph = memo(function AnswersGraph(props: {
     ? new Date(contract.createdTime)
     : hoursAgo.toDate()
 
+  const multiYear = !dayjs(startDate).isSame(latestTime, 'year')
   const lessThanAWeek = dayjs(startDate).add(1, 'week').isAfter(latestTime)
 
   return (
@@ -102,18 +99,21 @@ export const AnswersGraph = memo(function AnswersGraph(props: {
           min: startDate,
           max: latestTime.toDate(),
         }}
-        xFormat={(d) => formatTime(+d.valueOf(), lessThanAWeek)}
+        xFormat={(d) =>
+          formatTime(+d.valueOf(), multiYear, lessThanAWeek, lessThanAWeek)
+        }
         axisBottom={{
           tickValues: numXTickValues,
-          format: (time) => formatTime(+time, lessThanAWeek),
+          format: (time) => formatTime(+time, multiYear, lessThanAWeek, false),
         }}
         colors={{ scheme: 'pastel1' }}
         pointSize={0}
+        curve="stepAfter"
         enableSlices="x"
         enableGridX={!!width && width >= 800}
         enableArea
         areaOpacity={1}
-        margin={{ top: 20, right: 28, bottom: 22, left: 40 }}
+        margin={{ top: 20, right: 20, bottom: 25, left: 40 }}
         legends={[
           {
             anchor: 'top-left',
